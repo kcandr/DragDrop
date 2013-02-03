@@ -5,6 +5,7 @@
 #include <QPixmap>
 
 class BlankList;
+class TableWidget;
 class QListWidgetItem;
 
 class MainWindow : public QMainWindow
@@ -21,8 +22,9 @@ public slots:
 private:
     void setupWidgets();
 
-    QPixmap blankImage;
+    QPixmap blankImage;    
     BlankList *blankList;
+    TableWidget *tableWidget;
 };
 
 #endif // MAINWINDOW_H

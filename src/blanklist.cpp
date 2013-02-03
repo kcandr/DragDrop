@@ -1,8 +1,9 @@
 #include "blanklist.h"
 #include <QtGui>
+#include <QDebug>
 
 BlankList::BlankList(QWidget *parent) :
-    QListWidget(parent)
+    QListWidget(parent), m_Size(0)
 {
 }
 
@@ -42,7 +43,8 @@ void BlankList::dropEvent(QDropEvent *event)
         QByteArray blankData = event->mimeData()->data("image/drag");
         QDataStream dataStream(&blankData, QIODevice::ReadOnly);
         QPixmap pixmap;
-        dataStream >> pixmap;
+        int size;
+        dataStream >> pixmap >> size;
 
         addBlank(pixmap);
 
@@ -58,6 +60,7 @@ void BlankList::addBlank(QPixmap pixmap)
     QListWidgetItem *blankItem = new QListWidgetItem(this);
     blankItem->setIcon((QIcon(pixmap)));
     blankItem->setData(Qt::UserRole, QVariant(pixmap));
+    blankItem->setData(Qt::UserRole+1, QVariant(pixmap.width()));
     blankItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 }
 
@@ -69,8 +72,9 @@ void BlankList::startDrag(Qt::DropActions /*supportedActions*/)
     QByteArray itemData;
     QDataStream dataStream(&itemData, QIODevice::WriteOnly);
     QPixmap pixmap = qvariant_cast<QPixmap>(item->data(Qt::UserRole));
+    int size = qvariant_cast<int>(item->data(Qt::UserRole+1));
 
-    dataStream << pixmap;
+    dataStream << pixmap << size;
 
     QMimeData *mimeData = new QMimeData;
     mimeData->setData("image/drag", itemData);

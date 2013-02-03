@@ -14,10 +14,12 @@ TEMPLATE = app
 
 SOURCES += src/main.cpp\
         src/mainwindow.cpp \
-    src/blanklist.cpp
+    src/blanklist.cpp \
+    src/tablewidget.cpp
 
 HEADERS  += src/mainwindow.h \
-    src/blanklist.h
+    src/blanklist.h \
+    src/tablewidget.h
 
 RESOURCES += \
     drag.qrc

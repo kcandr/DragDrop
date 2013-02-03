@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "blanklist.h"
+#include "tablewidget.h"
 
 #include <QtGui>
 
@@ -43,7 +44,9 @@ void MainWindow::setupWidgets()
     QFrame *frame = new QFrame;
     QHBoxLayout *frameLayout = new QHBoxLayout(frame);
     blankList = new BlankList(200, this);
+    tableWidget = new TableWidget(600, this);
 
     frameLayout->addWidget(blankList);
+    frameLayout->addWidget(tableWidget);
     setCentralWidget(frame);
 }

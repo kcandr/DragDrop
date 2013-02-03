@@ -33,10 +33,20 @@ void TableWidget::dragLeaveEvent(QDragLeaveEvent *event)
 
 void TableWidget::dragMoveEvent(QDragMoveEvent *event)
 {
-    QRect updateRect = highlightedRect.unite(targetSquare(event->pos(), 200));
+    QRect updateRect;
+    //QRect updateRect = highlightedRect.unite(targetSquare(event->pos(), 200));
 
     if (event->mimeData()->hasFormat("image/drag")) {
-        highlightedRect = targetSquare(event->pos(), 200);
+        QByteArray blankData = event->mimeData()->data("image/drag");
+        QDataStream dataStream(&blankData, QIODevice::ReadOnly);
+        QPixmap pixmap;
+        int blankSize;
+
+        dataStream >> pixmap >> blankSize;
+
+        updateRect = highlightedRect.unite(targetSquare(event->pos(), blankSize));
+
+        highlightedRect = targetSquare(event->pos(), blankSize);
         event->setDropAction(Qt::MoveAction);
         event->accept();
     } else {
@@ -91,11 +101,12 @@ void TableWidget::mousePressEvent(QMouseEvent *event)
     }
 
     QPixmap pixmap = blankPixmaps[found];
-    QRect square = targetSquare(event->pos(), 200);
+    QRect blankSquare = blankRects[found];
+    //QRect square = targetSquare(event->pos(), );
     blankPixmaps.removeAt(found);
     blankRects.removeAt(found);
 
-    update(square);
+    update(blankSquare);
 
     QByteArray blankData;
     QDataStream dataStream(&blankData, QIODevice::WriteOnly);
@@ -112,8 +123,8 @@ void TableWidget::mousePressEvent(QMouseEvent *event)
 
     if (!(drag->exec(Qt::MoveAction) == Qt::MoveAction)) {
         blankPixmaps.insert(found, pixmap);
-        blankRects.insert(found, square);
-        update(targetSquare(event->pos(), 200));
+        blankRects.insert(found, blankSquare);
+        update(targetSquare(event->pos(), pixmap.width()));
     }
 
 }
@@ -125,7 +136,7 @@ void TableWidget::paintEvent(QPaintEvent *event)
     painter.fillRect(event->rect(), Qt::white);
 
     if (highlightedRect.isValid()) {
-        painter.setBrush(QColor("#ffcccc"));
+        painter.setBrush(QColor(255, 102, 0, 50));
         painter.setPen(Qt::NoPen);
         painter.drawRect(highlightedRect.adjusted(0, 0, -1, -1));
     }
@@ -137,5 +148,15 @@ void TableWidget::paintEvent(QPaintEvent *event)
 
 const QRect TableWidget::targetSquare(const QPoint &position, const int size) const
 {
-    return QRect(position.x() / 50 * 50, position.y() / 50 * 50, 200, 200);
+    bool isIntersects = false;
+    QRect target(position.x() / 50 * 50, position.y() / 50 * 50, size, size);
+
+    for (int i = 0; i < blankRects.size(); ++i) {
+        if (blankRects[i].intersects(target)) {
+            isIntersects = true;
+        }
+    }
+    if (!isIntersects) {
+        return target;
+    }
 }
